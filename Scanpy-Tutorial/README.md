@@ -1,8 +1,8 @@
 # Spatial Transcriptomics with Scanpy
 
-This notebook walks through a complete spatial transcriptomics analysis pipeline — from raw count data to biologically meaningful maps of gene expression across tissue. It covers two technologies: **10x Genomics Visium** and **MERFISH**, each with its own strengths and quirks.
+This notebook walks through a complete spatial transcriptomics analysis pipeline, from raw count data to biologically meaningful maps of gene expression across tissue. It covers two technologies: **10x Genomics Visium** and **MERFISH**, each with its own strengths and quirks.
 
-If you are new to spatial transcriptomics, think of it this way: regular single-cell RNA sequencing tells you *what* genes a cell expresses, but throws away *where* that cell was sitting in the tissue. Spatial transcriptomics keeps that location information. The result is something closer to a map than a list — you can see which cell types cluster near blood vessels, which genes are active at the tissue edge, and how cell identity changes across anatomy.
+If you are new to spatial transcriptomics, think of it this way: regular single-cell RNA sequencing tells you *what* genes a cell expresses, but throws away *where* that cell was sitting in the tissue. Spatial transcriptomics keeps that location information. The result is something closer to a map than a list, you can see which cell types cluster near blood vessels, which genes are active at the tissue edge, and how cell identity changes across anatomy.
 
 ---
 
@@ -18,7 +18,7 @@ The notebook also relies on `matplotlib`, `pandas`, `seaborn`, and `openpyxl`. T
 
 ## The Dataset
 
-The main dataset is a **human lymph node** captured with 10x Visium. The lymph node is a good test case for spatial analysis because it has well-defined anatomical zones — germinal centers packed with B cells, T cell zones, sinuses — so clustering results can be sanity-checked against known biology.
+The main dataset is a **human lymph node** captured with 10x Visium. The lymph node is a good test case for spatial analysis because it has well-defined anatomical zones, germinal centers packed with B cells, T cell zones, sinuses, so clustering results can be sanity-checked against known biology.
 
 The second dataset is a **mouse brain** section profiled with MERFISH, which operates at true single-cell resolution (as opposed to Visium's ~55 µm spots that may contain a few cells each).
 
@@ -75,7 +75,7 @@ Before filtering anything, you look at the distributions. Each panel answers a s
 | Genes per spot (full range) | Do most spots detect a reasonable number of genes? |
 | Genes per spot (< 4,000) | What does the bottom of the distribution look like? |
 
-The zoomed-in panels are the important ones. A cliff or gap in the histogram is what you are looking for — it tells you where "real tissue" ends and "background" begins.
+The zoomed-in panels are the important ones. A cliff or gap in the histogram is what you are looking for, it tells you where "real tissue" ends and "background" begins.
 
 ---
 
@@ -107,7 +107,7 @@ sc.pp.log1p(adata)
 sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=2000)
 ```
 
-Raw counts are noisy and incomparable across spots — one spot might have 8,000 total counts and another 30,000, which has nothing to do with biology. Normalization fixes that by scaling each spot to the same total.
+Raw counts are noisy and incomparable across spots, one spot might have 8,000 total counts and another 30,000, which has nothing to do with biology. Normalization fixes that by scaling each spot to the same total.
 
 The log transformation then compresses the dynamic range. A gene expressed at 10 counts vs. 1,000 counts is not actually 100× more biologically interesting, the log scale reflects that.
 
@@ -126,7 +126,7 @@ sc.tl.leiden(adata, key_added="clusters", flavor="igraph", directed=False, n_ite
 
 This is the analytical core of the pipeline. Four steps in sequence:
 
-**PCA** reduces the 2,000 HVGs down to a manageable number of principal components — linear combinations of genes that capture the most variance. Think of it as compression that preserves the important differences between spots.
+**PCA** reduces the 2,000 HVGs down to a manageable number of principal components, linear combinations of genes that capture the most variance. Think of it as compression that preserves the important differences between spots.
 
 **Neighbor graph** connects each spot to its most similar spots in PCA space. This graph is the data structure that both UMAP and Leiden operate on.
 
