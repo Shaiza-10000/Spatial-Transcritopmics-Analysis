@@ -1,6 +1,6 @@
 # Visium Fluorescence Image Analysis with Squidpy
 
-This notebook extends the standard spatial transcriptomics workflow by bringing **fluorescence image data** into the analysis alongside gene expression. Instead of treating the tissue image as a passive background, it actively extracts quantitative features from it — cell counts, intensity patterns, texture — and asks whether those image-derived features tell the same biological story as the gene expression clusters.
+This notebook extends the standard spatial transcriptomics workflow by bringing **fluorescence image data** into the analysis alongside gene expression. Instead of treating the tissue image as a passive background, it actively extracts quantitative features from it like cell counts, intensity patterns, textures and asks whether those image-derived features tell the same biological story as the gene expression clusters.
 
 The key question this notebook answers: **can you recover biologically meaningful tissue structure from the image alone, without looking at any gene expression data?**
 
@@ -12,7 +12,7 @@ The key question this notebook answers: **can you recover biologically meaningfu
 pip install anndata scanpy==1.11.0 squidpy python-igraph leidenalg
 ```
 
-This notebook uses [Squidpy](https://squidpy.readthedocs.io/) — a library built on top of Scanpy specifically for spatial data, with dedicated tools for image processing, segmentation, and feature extraction.
+This notebook uses [Squidpy](https://squidpy.readthedocs.io/), a library built on top of Scanpy specifically for spatial data, with dedicated tools for image processing, segmentation, and feature extraction.
 
 ---
 
@@ -52,7 +52,7 @@ Having both objects linked together is what makes the image feature analysis pos
 sq.pl.spatial_scatter(adata, color="cluster")
 ```
 
-The first plot maps the gene-expression-derived clusters onto the tissue. This is the **reference** — the biologically grounded picture of cell type organization that the rest of the notebook will try to reproduce using only image features. Keep this in mind as you go through the analysis. At the end, you compare back to it.
+The first plot maps the gene-expression-derived clusters onto the tissue. This is the **reference**, the biologically grounded picture of cell type organization that the rest of the notebook will try to reproduce using only image features. Keep this in mind as you go through the analysis. At the end, you compare back to it.
 
 ---
 
@@ -74,11 +74,11 @@ sq.im.process(img=img, layer="image", method="smooth")
 sq.im.segment(img=img, layer="image_smooth", method="watershed", channel=0, chunks=1000)
 ```
 
-Before segmenting cells, the image is smoothed. Smoothing reduces high-frequency noise — small pixel-level variation that has nothing to do with biology — so that the segmentation algorithm can find real cell boundaries rather than chasing noise.
+Before segmenting cells, the image is smoothed. Smoothing reduces high-frequency noise, small pixel-level variation that has nothing to do with biology so that the segmentation algorithm can find real cell boundaries rather than chasing noise.
 
-**Watershed segmentation** is then applied to the smoothed image. Watershed is a classic image segmentation algorithm that treats pixel intensities like a topographic map — it "floods" the image from local intensity minima and places boundaries where the flooding from different minima would meet. In fluorescence microscopy, where nuclei (stained with DAPI, for example) appear as bright islands on a dark background, watershed reliably separates individual cells.
+**Watershed segmentation** is then applied to the smoothed image. Watershed is a classic image segmentation algorithm that treats pixel intensities like a topographic map, it "floods" the image from local intensity minima and places boundaries where the flooding from different minima would meet. In fluorescence microscopy, where nuclei (stained with DAPI, for example) appear as bright islands on a dark background, watershed reliably separates individual cells.
 
-The crop-and-compare plot that follows shows a 500×500 pixel region of the tissue before and after segmentation — you can visually confirm that the algorithm is correctly outlining individual cells.
+The crop-and-compare plot that follows shows a 500×500 pixel region of the tissue before and after segmentation, you can visually confirm that the algorithm is correctly outlining individual cells.
 
 ---
 
@@ -98,7 +98,7 @@ sq.im.calculate_image_features(
 
 Now that individual cells are segmented, Squidpy counts how many cells fall within each Visium spot and measures the mean fluorescence intensity per channel within those segmented cells. These become per-spot features stored in `adata.obsm["features_segmentation"]`.
 
-This is biologically meaningful because cell density varies across tissue regions — germinal centers are densely packed, while stromal areas are sparse. If the segmentation is working correctly, cell count per spot should correlate with known cell-dense regions in your gene expression clusters.
+This is biologically meaningful because cell density varies across tissue regions, germinal centers are densely packed, while stromal areas are sparse. If the segmentation is working correctly, cell count per spot should correlate with known cell-dense regions in your gene expression clusters.
 
 The four-panel plot compares:
 
@@ -132,17 +132,17 @@ for feature_name, cur_params in params.items():
 
 This is the most feature-rich part of the notebook. Three different feature extraction strategies are run, each capturing a different aspect of the image:
 
-**features_orig** — extracts summary statistics, texture features, and pixel intensity histograms from the exact circular area underneath each Visium spot (`mask_circle=True`). This is the most precise — only pixels that the spot actually captures are used.
+**features_orig** - extracts summary statistics, texture features, and pixel intensity histograms from the exact circular area underneath each Visium spot (`mask_circle=True`). This is the most precise, only pixels that the spot actually captures are used.
 
-**features_context** — same features but without the circular mask, so it includes some surrounding tissue context. Useful when a biological signal (like a diffuse extracellular matrix pattern) extends beyond the spot boundary.
+**features_context** - same features but without the circular mask, so it includes some surrounding tissue context. Useful when a biological signal (like a diffuse extracellular matrix pattern) extends beyond the spot boundary.
 
-**features_lowres** — uses a downscaled version of the image (`scale=0.25`), which captures broader spatial patterns at the cost of fine detail. A cluster of cells looks like a blob at low resolution, which can sometimes be more informative than pixel-level noise.
+**features_lowres** - uses a downscaled version of the image (`scale=0.25`), which captures broader spatial patterns at the cost of fine detail. A cluster of cells looks like a blob at low resolution, which can sometimes be more informative than pixel-level noise.
 
 The three feature types are:
 
-- **Summary** — mean, standard deviation, percentiles of pixel intensities within the spot. Captures overall brightness and spread.
-- **Histogram** — distribution of pixel intensity values binned into buckets. More detailed than summary stats — captures whether a spot has a bimodal intensity distribution (two cell populations?) or a uniform one.
-- **Texture** — features derived from the Grey-Level Co-occurrence Matrix (GLCM), which describe how pixel intensities relate to their neighbors. Captures whether a region looks grainy, smooth, striated, or patchy — structural properties invisible to intensity-only features.
+- **Summary** - mean, standard deviation, percentiles of pixel intensities within the spot. Captures overall brightness and spread.
+- **Histogram** - distribution of pixel intensity values binned into buckets. More detailed than summary stats, captures whether a spot has a bimodal intensity distribution (two cell populations?) or a uniform one.
+- **Texture** - features derived from the Grey-Level Co-occurrence Matrix (GLCM), which describe how pixel intensities relate to their neighbors. Captures whether a region looks grainy, smooth, striated, or patchy, structural properties invisible to intensity-only features.
 
 All three sets are concatenated into a single feature matrix stored in `adata.obsm["features"]`.
 
@@ -166,9 +166,9 @@ adata.obs["features_histogram_cluster"] = cluster_features(adata.obsm["features"
 adata.obs["features_texture_cluster"] = cluster_features(adata.obsm["features"], like="texture")
 ```
 
-The `cluster_features` function runs the standard Scanpy clustering pipeline — scale, PCA, neighbors, Leiden — but on image features instead of gene expression. Each feature type is clustered independently so you can see which one best captures tissue organization.
+The `cluster_features` function runs the standard Scanpy clustering pipeline — scale, PCA, neighbors, Leiden, but on image features instead of gene expression. Each feature type is clustered independently so you can see which one best captures tissue organization.
 
-One detail worth noting: the features are **scaled before PCA**. This is important because image features have very different numerical ranges — a mean intensity might be 0.4 while a texture contrast value might be 120. Without scaling, PCA would be dominated by whichever feature has the largest absolute values, regardless of biological relevance.
+One detail worth noting: the features are **scaled before PCA**. This is important because image features have very different numerical ranges, a mean intensity might be 0.4 while a texture contrast value might be 120. Without scaling, PCA would be dominated by whichever feature has the largest absolute values, regardless of biological relevance.
 
 ---
 
@@ -184,9 +184,9 @@ sq.pl.spatial_scatter(
 
 The final plot puts everything side by side — three image-derived clusterings and the gene expression clustering. This is the payoff of the whole notebook.
 
-If the image-based clusters spatially resemble the gene expression clusters, it means the tissue's visual appearance carries real biological information. A region that looks different under fluorescence microscopy genuinely has different cell types or states — and vice versa. This kind of cross-modality validation is valuable because it builds confidence that the clusters represent real biology rather than computational artifacts.
+If the image-based clusters spatially resemble the gene expression clusters, it means the tissue's visual appearance carries real biological information. A region that looks different under fluorescence microscopy genuinely has different cell types or states, and vice versa. This kind of cross-modality validation is valuable because it builds confidence that the clusters represent real biology rather than computational artifacts.
 
-In practice, no image clustering will perfectly match gene expression — the modalities capture different things. But partial agreement, especially in anatomically distinct regions, is a meaningful result.
+In practice, no image clustering will perfectly match gene expression, the modalities capture different things. But partial agreement, especially in anatomically distinct regions, is a meaningful result.
 
 ---
 
